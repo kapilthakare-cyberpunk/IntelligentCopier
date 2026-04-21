@@ -1,4 +1,4 @@
-# 📁 Intelligent File Copier
+# Intelligent File Copier
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/kapilthakare-cyberpunk/IntelligentCopier)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -9,28 +9,28 @@ A robust, GUI-based file copying application with resume capability, intelligent
 
 ![Intelligent Copier Screenshot](assets/screenshot.png)
 
-## ✨ Features
+## Features
 
-### 🚀 Core Capabilities
+### Core Capabilities
 - **Resume Support**: Interrupted copies can be resumed without starting over
 - **Dry Run Mode**: Preview what will be copied before committing
 - **Real-time Progress**: Live progress tracking with speed and ETA
 - **Smart Verification**: Post-copy integrity verification
 - **Duplicate Handling**: Multiple strategies for duplicate files
 
-### 🛡️ Safety Features
+### Safety Features
 - **Session Persistence**: Automatically saves copy state
 - **Error Recovery**: Handles network interruptions and drive disconnections
 - **System File Exclusion**: Automatically skips macOS system files (.DS_Store, Spotlight, etc.)
 - **Permission Preservation**: Maintains file permissions and metadata
 
-### 📊 Monitoring & Reporting
+### Monitoring & Reporting
 - **Detailed Logging**: Complete activity log with timestamps
 - **Progress Statistics**: Files processed, transfer speed, time remaining
 - **Copy Reports**: Generate detailed post-copy reports
 - **Visual Feedback**: Color-coded status indicators
 
-## 🎯 Use Cases
+## Use Cases
 
 - **Large Data Migrations**: Moving TBs of data between drives
 - **Backup Operations**: Creating reliable backups with verification
@@ -38,7 +38,7 @@ A robust, GUI-based file copying application with resume capability, intelligent
 - **Project Archives**: Preserving project structures with integrity checks
 - **Cross-Platform Transfers**: Moving data between different filesystems
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.7 or higher
@@ -78,7 +78,7 @@ python3 src/intelligent_copier.py
 
 Windows support is experimental. Requires WSL or Git Bash with rsync installed.
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Launch the application**
    ```bash
@@ -127,18 +127,18 @@ Always recommended for large operations:
 If a copy is interrupted:
 1. Reconnect drives if disconnected
 2. Relaunch Intelligent Copier
-3. Click "🔄 Resume"
+3. Click "Resume"
 4. Click "Start Copy" - rsync will skip already-copied files
 
 ### Verification Process
 
 Post-copy verification checks:
-- ✅ File count matches
-- ✅ Total size matches
-- ✅ Sample file integrity (size comparison)
-- 📊 Detailed statistics report
+- File count matches
+- Total size matches
+- Sample file integrity (size comparison)
+- Detailed statistics report
 
-## 🔧 Configuration
+## Configuration
 
 Configuration is stored in `~/.intelligent_copier_config.json`:
 
@@ -156,7 +156,7 @@ Configuration is stored in `~/.intelligent_copier_config.json`:
 }
 ```
 
-## 🎨 Interface Guide
+## Interface Guide
 
 ### Main Window Sections
 
@@ -168,11 +168,11 @@ Configuration is stored in `~/.intelligent_copier_config.json`:
 
 ### Status Indicators
 
-- 🟢 **Ready**: Application ready to use
-- 🔵 **Copying**: Transfer in progress
-- 🟡 **Paused**: Copy interrupted
-- 🟠 **Verifying**: Post-copy verification running
-- 🔴 **Error**: Issue encountered
+- **Ready**: Application ready to use
+- **Copying**: Transfer in progress
+- **Paused**: Copy interrupted
+- **Verifying**: Post-copy verification running
+- **Error**: Issue encountered
 
 ### Log Colors
 
@@ -222,7 +222,7 @@ excludes = [
 ]
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -247,7 +247,7 @@ excludes = [
 - **Session state**: `~/.intelligent_copier_session.json`
 - **Configuration**: `~/.intelligent_copier_config.json`
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.7+
 - tkinter (usually included)
@@ -276,7 +276,7 @@ pip install -r requirements-dev.txt
 pytest tests/
 ```
 
-## 📝 Changelog
+## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
@@ -284,7 +284,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with Python and tkinter
 - Uses rsync for reliable file transfers
@@ -296,7 +296,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - **Discussions**: [GitHub Discussions](https://github.com/kapilthakare-cyberpunk/IntelligentCopier/discussions)
 - **Email**: kapil@example.com
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Windows native support
 - [ ] Cloud storage integration (S3, Google Drive)

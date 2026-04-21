@@ -68,7 +68,7 @@ Screenshots, mockups, or references
 6. Push to your fork (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
-## 🏗️ Development Setup
+## Development Setup
 
 ### Prerequisites
 
@@ -114,7 +114,7 @@ IntelligentCopier/
 └── CONTRIBUTING.md           # This file
 ```
 
-## 📝 Coding Standards
+## Coding Standards
 
 ### Python Style Guide
 
@@ -143,7 +143,7 @@ pytest tests/
 - Comment complex logic
 - Update CHANGELOG.md for significant changes
 
-## 🧪 Testing
+## Testing
 
 ### Writing Tests
 
@@ -179,7 +179,7 @@ pytest tests/ --cov=src --cov-report=html
 pytest tests/test_copier.py::TestIntelligentCopier::test_analyze
 ```
 
-## 🎨 UI/UX Guidelines
+## UI/UX Guidelines
 
 ### Design Principles
 
@@ -198,7 +198,7 @@ pytest tests/test_copier.py::TestIntelligentCopier::test_analyze
 5. Add tests
 6. Update CHANGELOG.md
 
-## 📦 Release Process
+## Release Process
 
 1. Update version number in `src/intelligent_copier.py`
 2. Update CHANGELOG.md
@@ -206,7 +206,7 @@ pytest tests/test_copier.py::TestIntelligentCopier::test_analyze
 4. Push tag: `git push origin v1.0.0`
 5. Create a GitHub release with notes
 
-## 💬 Communication
+## Communication
 
 ### Code of Conduct
 
@@ -222,7 +222,7 @@ pytest tests/test_copier.py::TestIntelligentCopier::test_analyze
 - **Feature requests**: GitHub Issues with label "enhancement"
 - **Security issues**: Email kapil@example.com directly
 
-## 🏆 Recognition
+## Recognition
 
 Contributors will be recognized in:
 - README.md Contributors section

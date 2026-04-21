@@ -15,23 +15,23 @@ open "Intelligent Copier.app"
 ### 2. Setting Up a Copy Operation
 
 #### Step 1: Select Source
-- Click the "📂 Browse" button next to "Source"
+- Click the "Browse" button next to "Source"
 - Navigate to and select the directory you want to copy from
 - The path will appear in the text field
 
 #### Step 2: Select Destination
-- Click the "📂 Browse" button next to "Destination"
+- Click the "Browse" button next to "Destination"
 - Navigate to and select (or create) the directory you want to copy to
 - The path will appear in the text field
 
 #### Step 3: Configure Options
 
 **Recommended Settings:**
-- ✅ **Dry Run First**: Always enable for large operations
-- ✅ **Verify After Copy**: Enable for critical data
-- ✅ **Preserve Permissions**: Keep checked for backups
-- ✅ **Exclude System Files**: Keep checked (skips .DS_Store, etc.)
-- 🔄 **Duplicates**: Choose based on your needs:
+- **Dry Run First**: Always enable for large operations
+- **Verify After Copy**: Enable for critical data
+- **Preserve Permissions**: Keep checked for backups
+- **Exclude System Files**: Keep checked (skips .DS_Store, etc.)
+- **Duplicates**: Choose based on your needs:
   - `review` - Safest option, moves duplicates to review folder
   - `skip` - Fastest, keeps destination version
   - `overwrite` - Replaces with newer files
@@ -39,7 +39,7 @@ open "Intelligent Copier.app"
 
 ### 3. Analyzing (Optional but Recommended)
 
-Click **"🔍 Analyze"** to:
+Click **"Analyze"** to:
 - Count total files and directories
 - Calculate total size
 - Estimate copy time
@@ -49,7 +49,7 @@ This gives you a preview before committing to the operation.
 
 ### 4. Starting the Copy
 
-Click **"▶️  Start Copy"** to begin.
+Click **" Start Copy"** to begin.
 
 **If Dry Run is enabled:**
 1. A dry run will execute first
@@ -64,18 +64,18 @@ Click **"▶️  Start Copy"** to begin.
 
 ### 5. Pausing (Optional)
 
-Click **"⏸️  Pause"** to temporarily stop:
+Click **" Pause"** to temporarily stop:
 - Copy can be resumed later
 - Already copied files are preserved
 - Session is automatically saved
 
-To resume, click **"⏸️  Resume"** (button changes to "▶️  Resume")
+To resume, click **" Resume"** (button changes to " Resume")
 
 ### 6. Verification (Recommended)
 
 After copy completes:
 
-Click **"✅ Verify"** to:
+Click **"Verify"** to:
 - Compare file counts (source vs destination)
 - Compare total sizes
 - Sample-check file integrity
@@ -83,7 +83,7 @@ Click **"✅ Verify"** to:
 
 ### 7. Generating Reports
 
-Click **"📊 Report"** to save a detailed copy report including:
+Click **"Report"** to save a detailed copy report including:
 - Timestamp and session ID
 - Source and destination paths
 - Total files and size
@@ -98,7 +98,7 @@ Click **"📊 Report"** to save a detailed copy report including:
 - Includes source, destination, and progress state
 
 **Manual Resume:**
-- Click **"🔄 Resume"** to load previous session
+- Click **"Resume"** to load previous session
 - Or restart app and it will prompt to resume
 
 **Starting Fresh:**
@@ -203,25 +203,25 @@ sudo yum install rsync       # RHEL/CentOS
 
 ### Before Large Copies
 
-1. ✅ **Always run Dry Run first**
-2. ✅ **Analyze to see file count and size**
-3. ✅ **Ensure destination has enough space**
-4. ✅ **Check drive health** (Disk Utility on macOS)
-5. ✅ **Close unnecessary applications**
-6. ✅ **Connect to power** (for laptops)
+1. **Always run Dry Run first**
+2. **Analyze to see file count and size**
+3. **Ensure destination has enough space**
+4. **Check drive health** (Disk Utility on macOS)
+5. **Close unnecessary applications**
+6. **Connect to power** (for laptops)
 
 ### During Copy
 
-1. 📊 **Monitor progress** periodically
+1. **Monitor progress** periodically
 2. 🔋 **Keep laptop plugged in**
 3. 🚫 **Don't disconnect drives**
 4. 💤 **Disable sleep mode** (System Preferences)
 
 ### After Copy
 
-1. ✅ **Always verify important data**
+1. **Always verify important data**
 2. 📄 **Save copy report**
-3. 🔍 **Spot-check key files**
+3. **Spot-check key files**
 4. 💾 **Keep source until verified**
 
 ### For Critical Data

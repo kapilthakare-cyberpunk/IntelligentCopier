@@ -157,7 +157,7 @@ class IntelligentCopier:
         title_frame.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 15))
         title_frame.columnconfigure(0, weight=1)
 
-        title = ttk.Label(title_frame, text="📁 Intelligent File Copier",
+        title = ttk.Label(title_frame, text="Intelligent File Copier",
                          style='Title.TLabel')
         title.grid(row=0, column=0, sticky="w")
 
@@ -205,7 +205,7 @@ class IntelligentCopier:
         source_entry = ttk.Entry(path_frame, textvariable=self.source_var,
                                 font=('Menlo', 10))
         source_entry.grid(row=0, column=1, sticky="ew", padx=8)
-        source_btn = ttk.Button(path_frame, text="📂 Browse",
+        source_btn = ttk.Button(path_frame, text="Browse",
                                command=self.browse_source)
         source_btn.grid(row=0, column=2)
 
@@ -217,12 +217,12 @@ class IntelligentCopier:
         dest_entry = ttk.Entry(path_frame, textvariable=self.dest_var,
                               font=('Menlo', 10))
         dest_entry.grid(row=1, column=1, sticky="ew", padx=8)
-        dest_btn = ttk.Button(path_frame, text="📂 Browse",
+        dest_btn = ttk.Button(path_frame, text="Browse",
                              command=self.browse_dest)
         dest_btn.grid(row=1, column=2)
 
         # Quick swap button
-        swap_btn = ttk.Button(path_frame, text="🔄 Swap",
+        swap_btn = ttk.Button(path_frame, text="Swap",
                              command=self.swap_paths, width=8)
         swap_btn.grid(row=0, column=3, rowspan=2, padx=8)
 
@@ -238,7 +238,7 @@ class IntelligentCopier:
         # Row 1: Main options
         self.dry_run_var = tk.BooleanVar(
             value=self.config['options'].get('dry_run', True))
-        dry_run_cb = ttk.Checkbutton(options_frame, text="🧪 Dry Run First",
+        dry_run_cb = ttk.Checkbutton(options_frame, text="Dry Run First",
                                      variable=self.dry_run_var)
         dry_run_cb.grid(row=0, column=0, sticky="w", pady=5)
         self.add_tooltip(dry_run_cb, "Preview what will be copied without \n"
@@ -246,7 +246,7 @@ class IntelligentCopier:
 
         self.verify_var = tk.BooleanVar(
             value=self.config['options'].get('verify', True))
-        verify_cb = ttk.Checkbutton(options_frame, text="✅ Verify After Copy",
+        verify_cb = ttk.Checkbutton(options_frame, text="Verify After Copy",
                                     variable=self.verify_var)
         verify_cb.grid(row=0, column=1, sticky="w", pady=5)
         self.add_tooltip(verify_cb, "Compare source and destination after \n"
@@ -363,21 +363,21 @@ class IntelligentCopier:
 
         # Primary actions
         self.analyze_btn = ttk.Button(
-            btn_frame, text="🔍 Analyze", command=self.analyze, width=12)
+            btn_frame, text="Analyze", command=self.analyze, width=12)
         self.analyze_btn.pack(side=tk.LEFT, padx=5)
 
         self.start_btn = ttk.Button(
-            btn_frame, text="▶️  Start Copy", command=self.start_copy,
+            btn_frame, text=" Start Copy", command=self.start_copy,
             width=12, style='Accent.TButton')
         self.start_btn.pack(side=tk.LEFT, padx=5)
 
         self.pause_btn = ttk.Button(
-            btn_frame, text="⏸️  Pause", command=self.pause_copy,
+            btn_frame, text=" Pause", command=self.pause_copy,
             width=12, state=tk.DISABLED)
         self.pause_btn.pack(side=tk.LEFT, padx=5)
 
         self.verify_btn = ttk.Button(
-            btn_frame, text="✅ Verify", command=self.verify_copy,
+            btn_frame, text="Verify", command=self.verify_copy,
             width=12, state=tk.NORMAL)
         self.verify_btn.pack(side=tk.LEFT, padx=5)
 
@@ -386,11 +386,11 @@ class IntelligentCopier:
             side=tk.LEFT, fill='y', padx=15)
 
         self.resume_btn = ttk.Button(
-            btn_frame, text="🔄 Resume", command=self.resume_session,
+            btn_frame, text="Resume", command=self.resume_session,
             width=12)
         self.resume_btn.pack(side=tk.LEFT, padx=5)
 
-        ttk.Button(btn_frame, text="📊 Report",
+        ttk.Button(btn_frame, text="Report",
                   command=self.generate_report, width=10).pack(
             side=tk.LEFT, padx=5)
 
@@ -535,7 +535,7 @@ class IntelligentCopier:
             messagebox.showerror("Error", f"Source does not exist:\n{source}")
             return
 
-        self.log(f"🔍 Analyzing {source}...")
+        self.log(f"Analyzing {source}...")
         self.status_var.set("Analyzing...")
         self.analyze_btn.config(state=tk.DISABLED)
 
@@ -602,7 +602,7 @@ class IntelligentCopier:
         os.makedirs(dest, exist_ok=True)
 
         if self.dry_run_var.get():
-            self.log("🧪 Running DRY RUN first...")
+            self.log("Running DRY RUN first...")
             self._run_rsync(source, dest, dry_run=True)
         else:
             if messagebox.askyesno("Confirm Copy",
@@ -617,7 +617,7 @@ class IntelligentCopier:
 
         self.start_btn.config(state=tk.DISABLED)
         self.analyze_btn.config(state=tk.DISABLED)
-        self.pause_btn.config(state=tk.NORMAL, text="⏸️  Pause")
+        self.pause_btn.config(state=tk.NORMAL, text=" Pause")
         self.verify_btn.config(state=tk.DISABLED)
 
         threading.Thread(target=self._rsync_worker,
@@ -727,7 +727,7 @@ class IntelligentCopier:
                         f"Files: {data['files']:,} | Dirs: {data['dirs']:,} | Size: {data['size']}"
                     )
                     self.status_var.set("Analysis complete")
-                    self.log(f"✓ Found {data['files']:,} files, {data['dirs']:,} directories, "
+                    self.log(f" Found {data['files']:,} files, {data['dirs']:,} directories, "
                             f"total size: {data['size']}", 'success')
                     self.analyze_btn.config(state=tk.NORMAL)
                 elif msg_type == 'complete':
@@ -737,7 +737,7 @@ class IntelligentCopier:
                     self.pause_btn.config(state=tk.DISABLED)
 
                     if data:  # dry run complete
-                        self.log("✓ Dry run complete. Ready to copy.", 'success')
+                        self.log(" Dry run complete. Ready to copy.", 'success')
                         self.status_var.set("Dry run complete")
                         if messagebox.askyesno("Dry Run Complete",
                                               "Proceed with actual copy?"):
@@ -745,7 +745,7 @@ class IntelligentCopier:
                             self.start_copy()
                     else:
                         elapsed = datetime.now() - self.stats['start_time']
-                        self.log(f"✓ Copy complete! Time: {elapsed}", 'success')
+                        self.log(f" Copy complete! Time: {elapsed}", 'success')
                         self.status_var.set("Copy complete")
                         self.progress_var.set(100)
                         self.verify_btn.config(state=tk.NORMAL)
@@ -756,7 +756,7 @@ class IntelligentCopier:
                                                    "Copy complete. Run verification now?"):
                                 self.verify_copy()
                 elif msg_type == 'error':
-                    self.log(f"❌ ERROR: {data}", 'error')
+                    self.log(f"ERROR: {data}", 'error')
                     self.is_copying = False
                     self.start_btn.config(state=tk.NORMAL)
                     self.analyze_btn.config(state=tk.NORMAL)
@@ -774,16 +774,16 @@ class IntelligentCopier:
         if self.is_copying and not self.is_paused:
             if self.copy_process:
                 self.copy_process.terminate()
-                self.log("⏸️ Copy paused", 'warning')
+                self.log("Copy paused", 'warning')
                 self.status_var.set("Paused")
                 self.is_paused = True
-                self.pause_btn.config(text="▶️  Resume")
+                self.pause_btn.config(text=" Resume")
                 self.save_session()
         elif self.is_paused:
             # Resume
-            self.log("▶️ Resuming copy...")
+            self.log("Resuming copy...")
             self.is_paused = False
-            self.pause_btn.config(text="⏸️  Pause")
+            self.pause_btn.config(text=" Pause")
             self.start_copy()
 
     def verify_copy(self):
@@ -795,7 +795,7 @@ class IntelligentCopier:
             messagebox.showerror("Error", "Please select source and destination")
             return
 
-        self.log("🔍 Starting verification...")
+        self.log("Starting verification...")
         self.status_var.set("Verifying...")
         self.is_verifying = True
         self.verify_btn.config(state=tk.DISABLED)
@@ -823,10 +823,10 @@ class IntelligentCopier:
             self.queue.put(('output', f"Destination files: {dest_count:,}"))
 
             if src_count == dest_count:
-                self.queue.put(('output', "✓ File counts match!"))
+                self.queue.put(('output', " File counts match!"))
             else:
                 diff = src_count - dest_count
-                self.queue.put(('output', f"⚠ Difference: {diff:,} files", 'warning'))
+                self.queue.put(('output', f"Difference: {diff:,} files", 'warning'))
 
             # Compare sizes
             self.queue.put(('status', 'Comparing sizes...'))
@@ -869,9 +869,9 @@ class IntelligentCopier:
                            f"Sample verification: {verified}/{sample_size} OK"))
 
             if failed == 0:
-                self.queue.put(('output', "✓ Verification complete - All good!", 'success'))
+                self.queue.put(('output', " Verification complete - All good!", 'success'))
             else:
-                self.queue.put(('output', f"⚠ {failed} issues found", 'warning'))
+                self.queue.put(('output', f"{failed} issues found", 'warning'))
 
             self.queue.put(('verify_complete', None))
 
@@ -935,7 +935,7 @@ class IntelligentCopier:
             self.source_var.set(session['source'])
             self.dest_var.set(session['dest'])
             self.session_id = session['session_id']
-            self.log(f"🔄 Resumed session from {session['timestamp']}")
+            self.log(f"Resumed session from {session['timestamp']}")
             messagebox.showinfo("Session Resumed",
                                 "Previous session loaded.\nClick 'Start Copy' to continue.")
         else:

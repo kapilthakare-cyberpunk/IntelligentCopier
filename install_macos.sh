@@ -3,14 +3,14 @@
 
 set -e
 
-echo "🍎 Intelligent File Copier - macOS Installer"
+echo "Intelligent File Copier - macOS Installer"
 echo "============================================"
 echo ""
 
 # Check Python version
 echo "Checking Python version..."
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python 3 is not installed"
+    echo "Python 3 is not installed"
     echo "Please install Python 3.7 or higher from https://python.org"
     exit 1
 fi
@@ -19,16 +19,16 @@ PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
 REQUIRED_VERSION="3.7"
 
 if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
-    echo "❌ Python $PYTHON_VERSION found, but 3.7+ required"
+    echo "Python $PYTHON_VERSION found, but 3.7+ required"
     exit 1
 fi
 
-echo "✅ Python $PYTHON_VERSION found"
+echo "Python $PYTHON_VERSION found"
 
 # Check rsync
 echo "Checking rsync..."
 if ! command -v rsync &> /dev/null; then
-    echo "❌ rsync not found. Installing..."
+    echo "rsync not found. Installing..."
     if command -v brew &> /dev/null; then
         brew install rsync
     else
@@ -36,7 +36,7 @@ if ! command -v rsync &> /dev/null; then
         exit 1
     fi
 else
-    echo "✅ rsync found"
+    echo "rsync found"
 fi
 
 # Create app bundle
@@ -97,7 +97,7 @@ cat > "$APP_DIR/Contents/Info.plist" << EOF
 </plist>
 EOF
 
-echo "✅ Application bundle created: $APP_DIR"
+echo "Application bundle created: $APP_DIR"
 
 # Create symlink in Desktop
 echo ""
@@ -107,11 +107,11 @@ if [ -L "$DESKTOP_LINK" ]; then
     rm "$DESKTOP_LINK"
 fi
 ln -s "$APP_DIR" "$DESKTOP_LINK"
-echo "✅ Desktop shortcut created"
+echo "Desktop shortcut created"
 
 echo ""
 echo "============================================"
-echo "🎉 Installation complete!"
+echo "Installation complete!"
 echo ""
 echo "Launch from:"
 echo "  • Applications folder: $APP_DIR"
