@@ -15,6 +15,7 @@ import subprocess
 import threading
 import os
 import json
+import shutil
 import hashlib
 from datetime import datetime
 from pathlib import Path
@@ -446,6 +447,10 @@ class IntelligentCopier:
 
         ttk.Button(btn_frame, text="Report",
                   command=self.generate_report, width=10).pack(
+            side=tk.LEFT, padx=5)
+
+        ttk.Button(btn_frame, text="Safe Delete",
+                  command=self.safe_delete_check, width=10).pack(
             side=tk.LEFT, padx=5)
 
     def setup_status_bar(self, parent, row):
@@ -1064,6 +1069,226 @@ class IntelligentCopier:
 
             except Exception as e:
                 self.log(f"Failed to save report: {e}", 'error')
+
+    def safe_delete_check(self):
+        """Check which folders are safely copied and can be deleted from source."""
+        source = self.source_var.get()
+        dest = self.dest_var.get()
+
+        if not source or not dest:
+            messagebox.showerror("Error", "Please select source and destination first")
+            return
+
+        if not os.path.exists(source) or not os.path.exists(dest):
+            messagebox.showerror("Error", "Source or destination not found")
+            return
+
+        self.log("Starting safe delete check...")
+        threading.Thread(target=self._safe_delete_worker,
+                        args=(source, dest), daemon=True).start()
+
+    def _safe_delete_worker(self, source, dest):
+        """Worker for safe delete verification."""
+        try:
+            self.queue.put(('status', 'Analyzing folders...'))
+
+            source_folders = set()
+            for item in os.listdir(source):
+                path = os.path.join(source, item)
+                if os.path.isdir(path) and not item.startswith('.'):
+                    source_folders.add(item)
+
+            dest_folders = set()
+            for item in os.listdir(dest):
+                path = os.path.join(dest, item)
+                if os.path.isdir(path) and not item.startswith('.'):
+                    dest_folders.add(item)
+
+            copied = source_folders & dest_folders
+            not_copied = source_folders - dest_folders
+
+            self.queue.put(('output', f"Found {len(copied)} folders in both source and destination"))
+            self.queue.put(('output', f"Found {len(not_copied)} folders still needing to be copied"))
+
+            if not copied:
+                self.queue.put(('output', "No folders verified yet - nothing to delete", 'warning'))
+                self.queue.put(('safe_delete_result', {'copied': [], 'not_copied': list(not_copied)}))
+                return
+
+            verified_folders = []
+            failed_folders = []
+
+            self.queue.put(('status', 'Verifying file integrity with Magika...'))
+
+            for folder in sorted(copied):
+                src_path = os.path.join(source, folder)
+                dst_path = os.path.join(dest, folder)
+
+                if not os.path.exists(dst_path):
+                    failed_folders.append(folder)
+                    continue
+
+                sample_files = []
+                for root, dirs, files in os.walk(dst_path):
+                    for f in files:
+                        if not f.startswith('.') and len(sample_files) < 5:
+                            sample_files.append(os.path.join(root, f))
+                    if len(sample_files) >= 5:
+                        break
+
+                if not sample_files:
+                    verified_folders.append(folder)
+                    continue
+
+                if self.magika:
+                    all_ok = True
+                    for f in sample_files:
+                        try:
+                            self.magika.identify_path(f)
+                        except:
+                            all_ok = False
+                            break
+                    if all_ok:
+                        verified_folders.append(folder)
+                    else:
+                        failed_folders.append(folder)
+                else:
+                    verified_folders.append(folder)
+
+            self.queue.put(('safe_delete_result', {
+                'verified': verified_folders,
+                'failed': failed_folders,
+                'not_copied': list(not_copied)
+            }))
+
+        except Exception as e:
+            self.queue.put(('error', f"Safe delete check failed: {str(e)}"))
+
+    def process_queue(self):
+        """Process messages from worker threads."""
+        try:
+            while True:
+                msg_type, data = self.queue.get_nowait()
+
+                if msg_type == 'safe_delete_result':
+                    self._show_safe_delete_dialog(data)
+                    continue
+
+                if msg_type == 'output':
+                    if isinstance(data, tuple):
+                        message, level = data
+                    else:
+                        message = data
+                        level = 'info'
+                    self.log(message, level)
+                elif msg_type == 'status':
+                    self.status_var.set(data)
+                elif msg_type == 'progress':
+                    self.progress_var.set(data)
+                elif msg_type == 'speed':
+                    self.speed_var.set(f"Speed: {data}")
+                elif msg_type == 'eta':
+                    self.time_var.set(f"ETA: {data}")
+                elif msg_type == 'stats':
+                    self.stats_var.set(data)
+                elif msg_type == 'analyze_done':
+                    self.log(f"Analysis: {data['files']} files, {data['dirs']} directories, {data['size']}")
+                    self.status_var.set("Ready")
+                    self.analyze_btn.config(state=tk.NORMAL)
+                elif msg_type == 'copy_complete':
+                    self.is_copying = False
+                    self.start_btn.config(state=tk.NORMAL)
+                    self.analyze_btn.config(state=tk.NORMAL)
+                    self.pause_btn.config(state=tk.DISABLED)
+                    if data.get('dry_run'):
+                        self.dry_run_var.set(False)
+                        self.start_copy()
+                    else:
+                        elapsed = datetime.now() - self.stats['start_time']
+                        self.log(f" Copy complete! Time: {elapsed}", 'success')
+                        self.status_var.set("Copy complete")
+                        self.progress_var.set(100)
+                        self.verify_btn.config(state=tk.NORMAL)
+                        self.save_session()
+
+                        if self.verify_var.get():
+                            if messagebox.askyesno("Verify?",
+                                                   "Copy complete. Run verification now?"):
+                                self.verify_copy()
+                elif msg_type == 'error':
+                    self.log(f"ERROR: {data}", 'error')
+                    self.is_copying = False
+                    self.start_btn.config(state=tk.NORMAL)
+                    self.analyze_btn.config(state=tk.NORMAL)
+                    self.pause_btn.config(state=tk.DISABLED)
+                    self.status_var.set("Error occurred")
+                    messagebox.showerror("Error", str(data))
+
+        except queue.Empty:
+            pass
+
+        self.root.after(100, self.process_queue)
+
+    def _show_safe_delete_dialog(self, data):
+        """Show dialog with safe delete options."""
+        verified = data.get('verified', [])
+        failed = data.get('failed', [])
+        not_copied = data.get('not_copied', [])
+
+        if not verified:
+            messagebox.showinfo("Safe Delete Check",
+                "No folders have been fully copied yet.\n\n"
+                f"Folders still needing copy: {', '.join(not_copied) if not_copied else 'None'}")
+            return
+
+        msg = "Folders VERIFIED safe to delete from source:\n\n"
+        msg += "✓ " + "\n✓ ".join(verified) + "\n\n"
+
+        if failed:
+            msg += "Folders with issues (NOT safe to delete):\n"
+            msg += "✗ " + "\n✗ ".join(failed) + "\n\n"
+
+        if not_copied:
+            msg += f"Folders not yet copied: {', '.join(not_copied)}\n\n"
+
+        msg += "Do you want to delete the verified folders from source?"
+
+        if messagebox.askyesno("Safe Delete", msg):
+            self._delete_verified_folders(verified)
+
+    def _delete_verified_folders(self, folders):
+        """Delete verified folders from source after final confirmation."""
+        source = self.source_var.get()
+
+        confirm_msg = "This will PERMANENTLY DELETE these folders from source:\n\n"
+        confirm_msg += "⚠️ " + "\n⚠️ ".join(folders) + "\n\n"
+        confirm_msg += "This action cannot be undone!\n\n"
+        confirm_msg += "Are you absolutely sure?"
+
+        if messagebox.askyesno("CONFIRM DELETE", confirm_msg):
+            self.log(f"Starting deletion of {len(folders)} folders...")
+            threading.Thread(target=self._delete_worker,
+                            args=(folders, source), daemon=True).start()
+
+    def _delete_worker(self, folders, source):
+        """Worker thread for deleting folders."""
+        deleted = []
+        failed = []
+
+        for folder in folders:
+            path = os.path.join(source, folder)
+            try:
+                shutil.rmtree(path)
+                deleted.append(folder)
+                self.queue.put(('output', f"Deleted: {folder}"))
+            except Exception as e:
+                failed.append((folder, str(e)))
+                self.queue.put(('output', f"Failed to delete {folder}: {e}", 'error'))
+
+        if deleted:
+            self.queue.put(('output', f"Successfully deleted {len(deleted)} folders", 'success'))
+        if failed:
+            self.queue.put(('output', f"Failed to delete {len(failed)} folders", 'warning'))
 
     def resume_session(self):
         """Resume from a previous session."""
