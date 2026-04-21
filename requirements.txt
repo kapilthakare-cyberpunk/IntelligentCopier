@@ -1,0 +1,14 @@
+# Intelligent File Copier - Requirements
+# Runtime dependencies
+
+# Tkinter is typically included with Python
+# No additional runtime dependencies required
+
+# Optional dependencies for enhanced features
+# Uncomment if needed:
+
+# psutil>=5.9.0  # System monitoring
+# humanize>=4.0.0  # Human-readable sizes
+# Pillow>=9.0.0  # Image handling for thumbnails
+
+# Development dependencies (see requirements-dev.txt)

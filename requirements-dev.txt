@@ -1,0 +1,20 @@
+# Intelligent File Copier - Development Requirements
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Code quality
+flake8>=6.0.0
+black>=22.0.0
+mypy>=1.0.0
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.2.0
+
+# Build tools
+pyinstaller>=5.0.0  # For creating standalone executables
+setuptools>=65.0.0
+wheel>=0.38.0
