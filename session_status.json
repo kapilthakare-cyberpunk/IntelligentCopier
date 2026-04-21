@@ -1,0 +1,34 @@
+{
+  "session_id": "20260421_164751",
+  "source": "/Volumes/SanDisk Extreme SSD/SanDisk SSD KT Data",
+  "dest": "/Volumes/WESTERNDIGI/SanDisk SSD KT Data",
+  "timestamp": "2026-04-21T16:51:22",
+  "last_updated": "2026-04-21T22:43:00",
+  "status": "paused",
+  "stats": {
+    "files_total": 384192,
+    "files_copied": 54516,
+    "bytes_total": 327491031040,
+    "bytes_copied": 125606424576,
+    "percentage_complete": 38.4,
+    "elapsed_time_hours": 4.28,
+    "estimated_remaining_hours": 6.5
+  },
+  "incomplete_folders": [
+    {
+      "name": "Drive GoogleTakeout 1 Dec 2021",
+      "source_size_gb": 145,
+      "dest_size_gb": 111,
+      "remaining_gb": 34
+    },
+    {
+      "name": "GoogleDrive Backup Kapil",
+      "source_size_gb": 44,
+      "dest_size_gb": 0.016,
+      "remaining_gb": 44
+    }
+  ],
+  "can_resume": true,
+  "safe_to_delete_source": false,
+  "notes": "Session paused safely. Resume command prepared in COPY_SESSION_STATUS.md"
+}
