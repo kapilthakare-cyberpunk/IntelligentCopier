@@ -11,4 +11,8 @@
 # humanize>=4.0.0  # Human-readable sizes
 # Pillow>=9.0.0  # Image handling for thumbnails
 
+# Magika - AI-powered file type detection (optional, enables smart filtering)
+# Install with: pip install magika
+# magika>=0.5.0  # Uncomment to enable content-aware file type detection
+
 # Development dependencies (see requirements-dev.txt)

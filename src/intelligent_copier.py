@@ -21,6 +21,13 @@ from pathlib import Path
 import queue
 import re
 
+# Optional: Magika for AI-powered file type detection
+try:
+    from magika import Magika
+    MAGIKA_AVAILABLE = True
+except ImportError:
+    MAGIKA_AVAILABLE = False
+
 __version__ = "1.0.0"
 __author__ = "Kapil Thakare"
 
@@ -62,9 +69,20 @@ class IntelligentCopier:
         self.log_file = Path.home() / f"intelligent_copier_{self.session_id}.log"
         self.load_config()
 
+        # Initialize Magika for file type detection
+        self.magika = None
+        if MAGIKA_AVAILABLE:
+            try:
+                self.magika = Magika()
+            except Exception:
+                pass
+
         self.setup_ui()
         self.queue = queue.Queue()
         self.root.after(100, self.process_queue)
+
+        if self.magika:
+            self.log("Magika AI file type detection enabled", "success")
 
         # Welcome message
         self.log("Welcome to Intelligent File Copier v1.0")
@@ -282,6 +300,42 @@ class IntelligentCopier:
                          "• overwrite: Replace with newer\n"
                          "• rename: Add suffix (_1, _2)\n"
                          "• review: Move to review folder")
+
+        # Row 3: File type filtering with Magika
+        filter_frame = ttk.Frame(options_frame)
+        filter_frame.grid(row=2, column=0, columnspan=3, sticky="w", pady=5)
+
+        self.filter_enabled_var = tk.BooleanVar(value=False)
+        filter_cb = ttk.Checkbutton(
+            filter_frame, text="🤖 AI File Type Filter",
+            variable=self.filter_enabled_var,
+            command=self.toggle_file_filter)
+        filter_cb.pack(side=tk.LEFT)
+
+        self.filter_categories = {
+            'images': tk.BooleanVar(value=True),
+            'videos': tk.BooleanVar(value=True),
+            'audio': tk.BooleanVar(value=True),
+            'documents': tk.BooleanVar(value=True),
+            'code': tk.BooleanVar(value=True),
+            'archives': tk.BooleanVar(value=True),
+            'other': tk.BooleanVar(value=True)
+        }
+
+        self.filter_combo = ttk.Combobox(
+            filter_frame,
+            values=["Include selected", "Exclude selected"],
+            state="disabled", width=15)
+        self.filter_combo.current(0)
+        self.filter_combo.pack(side=tk.LEFT, padx=10)
+        self.add_tooltip(self.filter_combo, "Include or exclude selected file types")
+
+        for cat in ['images', 'videos', 'audio', 'documents', 'code', 'archives']:
+            cb = ttk.Checkbutton(
+                filter_frame, text=cat.capitalize(),
+                variable=self.filter_categories[cat],
+                state=tk.DISABLED)
+            cb.pack(side=tk.LEFT, padx=2)
 
     def setup_progress_section(self, parent, row):
         """Setup progress bar and statistics."""
@@ -522,6 +576,89 @@ class IntelligentCopier:
         self.source_var.set(dest)
         self.dest_var.set(source)
         self.log("Source and destination swapped.")
+
+    def toggle_file_filter(self):
+        enabled = self.filter_enabled_var.get()
+        state = tk.NORMAL if enabled else tk.DISABLED
+        self.filter_combo.config(state=state)
+        for cb in self.filter_categories.values():
+            cb.config(state=state)
+
+    def identify_file_type(self, file_path):
+        """Identify file type using Magika AI."""
+        if not self.magika:
+            return None
+        try:
+            result = self.magika.identify_path(file_path)
+            return result.output
+        except Exception:
+            return None
+
+    def get_file_type_category(self, file_path):
+        """Get file type category for filtering."""
+        info = self.identify_file_type(file_path)
+        if not info:
+            return None
+        return {
+            'label': info.label,
+            'description': info.description,
+            'group': info.group,
+            'mime_type': info.mime_type
+        }
+
+    def get_category_from_group(self, group):
+        """Map Magika group to our filter categories."""
+        mapping = {
+            'image': 'images',
+            'video': 'videos',
+            'audio': 'audio',
+            'document': 'documents',
+            'code': 'code',
+            'archive': 'archives'
+        }
+        return mapping.get(group, 'other')
+
+    def should_include_file(self, file_path):
+        """Determine if file should be included based on filters."""
+        if not self.filter_enabled_var.get() or not self.magika:
+            return True
+
+        info = self.get_file_type_category(file_path)
+        if not info:
+            return self.filter_categories.get('other', tk.BooleanVar(value=True)).get()
+
+        category = self.get_category_from_group(info.get('group', ''))
+        include = self.filter_categories.get(category, tk.BooleanVar(value=True)).get()
+        mode = self.filter_combo.get()
+        return include if mode == "Include selected" else not include
+
+    def find_content_duplicates(self, file_list):
+        """Find duplicates using content hashing with Magika type info."""
+        if not file_list:
+            return []
+
+        hash_map = {}
+        duplicates = []
+
+        for file_path in file_list:
+            try:
+                file_hash = hashlib.md5()
+                with open(file_path, 'rb') as f:
+                    for chunk in iter(lambda: f.read(8192), b''):
+                        file_hash.update(chunk)
+                digest = file_hash.hexdigest()
+
+                type_info = self.get_file_type_category(file_path)
+                key = (digest, type_info.get('label') if type_info else 'unknown')
+
+                if key in hash_map:
+                    duplicates.append((file_path, hash_map[key]))
+                else:
+                    hash_map[key] = file_path
+            except Exception:
+                pass
+
+        return duplicates
 
     def analyze(self):
         """Analyze source directory structure."""

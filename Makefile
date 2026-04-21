@@ -15,27 +15,27 @@ help:
 	@echo "  macos       - Create macOS app bundle"
 
 install:
-	pip install -r requirements.txt
+	python3.14 -m pip install -r requirements.txt
 
 install-dev:
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	python3.14 -m pip install -r requirements.txt
+	python3.14 -m pip install -r requirements-dev.txt
 
 run:
-	python3 src/intelligent_copier.py
+	python3.14 src/intelligent_copier.py
 
 test:
-	pytest tests/ -v
+	python3.14 -m pytest tests/ -v
 
 test-cov:
-	pytest tests/ --cov=src --cov-report=html
+	python3.14 -m pytest tests/ --cov=src --cov-report=html
 
 lint:
-	flake8 src/ --max-line-length=100
-	mypy src/
+	python3.14 -m flake8 src/ --max-line-length=100
+	python3.14 -m mypy src/
 
 format:
-	black src/ tests/
+	python3.14 -m black src/ tests/
 
 clean:
 	rm -rf build/
