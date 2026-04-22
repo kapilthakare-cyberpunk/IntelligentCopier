@@ -39,6 +39,45 @@ PROGRESS_UPDATE_INTERVAL = 100  # ms
 MAX_LOG_LINES = 1000
 RECENT_PATHS_LIMIT = 10
 
+# UI Constants for improved design
+UI_CONSTANTS = {
+    'spacing': {
+        'xxs': 2,
+        'xs': 4,
+        'sm': 8,
+        'md': 12,
+        'lg': 16,
+        'xl': 24
+    },
+    'fonts': {
+        'title': ('Helvetica', 20, 'bold'),
+        'header': ('Helvetica', 12, 'bold'),
+        'subheader': ('Helvetica', 11, 'bold'),
+        'body': ('Helvetica', 10),
+        'body_bold': ('Helvetica', 10, 'bold'),
+        'small': ('Helvetica', 9),
+        'code': ('Menlo', 10),
+        'status': ('Helvetica', 10, 'bold')
+    },
+    'colors': {
+        'primary': '#007AFF',
+        'secondary': '#5856D6',
+        'success': '#34C759',
+        'warning': '#FF9500',
+        'error': '#FF3B30',
+        'background': '#F2F2F7',
+        'surface': '#FFFFFF',
+        'text_primary': '#000000',
+        'text_secondary': '#636366',
+        'text_tertiary': '#8E8E93',
+        'border': '#C6C6C8',
+        'disabled': '#AEAEB2'
+    },
+    'button_padding': {'x': 12, 'y': 6},
+    'entry_padding': {'x': 8, 'y': 6},
+    'label_padding': {'x': 8, 'y': 4}
+}
+
 __version__ = "1.0.0"
 __author__ = "Kapil Thakare"
 
@@ -104,14 +143,69 @@ class IntelligentCopier:
         style = ttk.Style()
         style.theme_use('clam')
 
-        # Configure colors
-        style.configure('Title.TLabel', font=('Helvetica', 18, 'bold'))
-        style.configure('Header.TLabel', font=('Helvetica', 12, 'bold'))
-        style.configure('Status.TLabel', font=('Helvetica', 10))
-        style.configure('Accent.TButton', font=('Helvetica', 10, 'bold'))
+        # Configure colors using UI constants
+        colors = UI_CONSTANTS['colors']
+        fonts = UI_CONSTANTS['fonts']
+        spacing = UI_CONSTANTS['spacing']
+        
+        # Configure custom styles
+        style.configure('Title.TLabel', 
+                       font=fonts['title'], 
+                       foreground=colors['primary'])
+        style.configure('Header.TLabel', 
+                       font=fonts['header'], 
+                       foreground=colors['text_primary'])
+        style.configure('SubHeader.TLabel', 
+                       font=fonts['subheader'], 
+                       foreground=colors['text_primary'])
+        style.configure('Status.TLabel', 
+                       font=fonts['status'], 
+                       foreground=colors['text_secondary'])
+        style.configure('Accent.TButton', 
+                       font=fonts['body_bold'],
+                       foreground='white')
 
         # Progress bar style
-        style.configure('Horizontal.TProgressbar', thickness=25)
+        style.configure('Horizontal.TProgressbar', 
+                       thickness=20,
+                       troughcolor=colors['border'],
+                       background=colors['primary'])
+        
+        # Entry styles
+        style.configure('Modern.TEntry',
+                       fieldbackground=colors['surface'],
+                       borderwidth=1,
+                       relief='solid')
+        
+        # LabelFrame styles
+        style.configure('Modern.TLabelframe',
+                       background=colors['surface'],
+                       borderwidth=1,
+                       relief='solid')
+        style.configure('Modern.TLabelframe.Label',
+                       background=colors['surface'],
+                       foreground=colors['text_primary'],
+                       font=fonts['header'])
+        
+        # Checkbutton styles
+        style.configure('Modern.TCheckbutton',
+                       background=colors['surface'],
+                       foreground=colors['text_primary'],
+                       font=fonts['body'])
+        
+        # Combobox styles
+        style.configure('Modern.TCombobox',
+                       fieldbackground=colors['surface'],
+                       background=colors['surface'],
+                       arrowcolor=colors['text_primary'])
+        
+        # Button styles
+        style.configure('Modern.TButton',
+                       padding=(spacing['sm'], spacing['xs']),
+                       font=fonts['body'])
+        style.configure('Modern.Accent.TButton',
+                       font=fonts['body_bold'],
+                       foreground='white')
 
     def load_config(self):
         """Load user configuration from file."""
@@ -174,7 +268,8 @@ class IntelligentCopier:
     def setup_ui(self):
         """Setup the user interface."""
         # Main container with padding
-        main = ttk.Frame(self.root, padding="15")
+        spacing = UI_CONSTANTS['spacing']
+        main = ttk.Frame(self.root, padding=spacing['lg'])
         main.grid(row=0, column=0, sticky="nsew")
 
         self.root.columnconfigure(0, weight=1)
@@ -183,7 +278,7 @@ class IntelligentCopier:
 
         # Title Header
         title_frame = ttk.Frame(main)
-        title_frame.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 15))
+        title_frame.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, spacing['lg']))
         title_frame.columnconfigure(0, weight=1)
 
         title = ttk.Label(title_frame, text="Intelligent File Copier",
@@ -191,12 +286,13 @@ class IntelligentCopier:
         title.grid(row=0, column=0, sticky="w")
 
         version = ttk.Label(title_frame, text=f"v{__version__}",
-                           foreground='gray')
+                           style='Header.TLabel',
+                           foreground=UI_CONSTANTS['colors']['text_tertiary'])
         version.grid(row=0, column=1, sticky="e")
 
         # Separator
-        ttk.Separator(main, orient='horizontal').grid(
-            row=1, column=0, columnspan=3, sticky="ew", pady=10)
+        ttk.Separator(main, orient='horizontal', style='Modern.TSeparator').grid(
+            row=1, column=0, columnspan=3, sticky="ew", pady=spacing['md'])
 
         # Path Selection Section
         self.setup_path_section(main, 2)
@@ -221,45 +317,58 @@ class IntelligentCopier:
 
     def setup_path_section(self, parent, row):
         """Setup source and destination path selection."""
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        
         path_frame = ttk.LabelFrame(parent, text="Source & Destination",
-                                    padding="15")
-        path_frame.grid(row=row, column=0, columnspan=3, sticky="ew", pady=10)
+                                    style='Modern.TLabelframe',
+                                    padding=(spacing['md'], spacing['sm']))
+        path_frame.grid(row=row, column=0, columnspan=3, sticky="ew", pady=(0, spacing['md']))
         path_frame.columnconfigure(1, weight=1)
 
         # Source
         ttk.Label(path_frame, text="Source:",
-                 font=('Helvetica', 10, 'bold')).grid(
-            row=0, column=0, sticky="w", pady=8)
+                 style='Header.TLabel').grid(
+            row=0, column=0, sticky="w", pady=(0, spacing['xs']))
         self.source_var = tk.StringVar(value=self.config.get('source', ''))
         source_entry = ttk.Entry(path_frame, textvariable=self.source_var,
-                                font=('Menlo', 10))
-        source_entry.grid(row=0, column=1, sticky="ew", padx=8)
+                                style='Modern.TEntry',
+                                font=fonts['code'])
+        source_entry.grid(row=0, column=1, sticky="ew", padx=(0, spacing['sm']), pady=(0, spacing['xs']))
         source_btn = ttk.Button(path_frame, text="Browse",
+                               style='Modern.TButton',
                                command=self.browse_source)
-        source_btn.grid(row=0, column=2)
+        source_btn.grid(row=0, column=2, padx=(spacing['xs'], 0), pady=(0, spacing['xs']))
 
         # Destination
         ttk.Label(path_frame, text="Destination:",
-                 font=('Helvetica', 10, 'bold')).grid(
-            row=1, column=0, sticky="w", pady=8)
+                 style='Header.TLabel').grid(
+            row=1, column=0, sticky="w", pady=(spacing['xs'], 0))
         self.dest_var = tk.StringVar(value=self.config.get('dest', ''))
         dest_entry = ttk.Entry(path_frame, textvariable=self.dest_var,
-                              font=('Menlo', 10))
-        dest_entry.grid(row=1, column=1, sticky="ew", padx=8)
+                              style='Modern.TEntry',
+                              font=fonts['code'])
+        dest_entry.grid(row=1, column=1, sticky="ew", padx=(0, spacing['sm']), pady=(spacing['xs'], 0))
         dest_btn = ttk.Button(path_frame, text="Browse",
+                             style='Modern.TButton',
                              command=self.browse_dest)
-        dest_btn.grid(row=1, column=2)
+        dest_btn.grid(row=1, column=2, padx=(spacing['xs'], 0), pady=(spacing['xs'], 0))
 
         # Quick swap button
         swap_btn = ttk.Button(path_frame, text="Swap",
+                             style='Modern.TButton',
                              command=self.swap_paths, width=8)
-        swap_btn.grid(row=0, column=3, rowspan=2, padx=8)
+        swap_btn.grid(row=0, column=3, rowspan=2, padx=(spacing['sm'], 0), pady=(0, spacing['xs']))
 
     def setup_options_section(self, parent, row):
         """Setup options frame."""
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        
         options_frame = ttk.LabelFrame(parent, text="Copy Options",
-                                       padding="15")
-        options_frame.grid(row=row, column=0, columnspan=3, sticky="ew", pady=10)
+                                       style='Modern.TLabelframe',
+                                       padding=(spacing['md'], spacing['sm']))
+        options_frame.grid(row=row, column=0, columnspan=3, sticky="ew", pady=(0, spacing['md']))
         options_frame.columnconfigure(0, weight=1)
         options_frame.columnconfigure(1, weight=1)
         options_frame.columnconfigure(2, weight=1)
@@ -268,60 +377,66 @@ class IntelligentCopier:
         self.dry_run_var = tk.BooleanVar(
             value=self.config['options'].get('dry_run', True))
         dry_run_cb = ttk.Checkbutton(options_frame, text="Dry Run First",
+                                     style='Modern.TCheckbutton',
                                      variable=self.dry_run_var)
-        dry_run_cb.grid(row=0, column=0, sticky="w", pady=5)
+        dry_run_cb.grid(row=0, column=0, sticky="w", pady=(0, spacing['xs']))
         self.add_tooltip(dry_run_cb, "Preview what will be copied without \n"
-                        "actually copying any files")
+                         "actually copying any files")
 
         self.verify_var = tk.BooleanVar(
             value=self.config['options'].get('verify', True))
         verify_cb = ttk.Checkbutton(options_frame, text="Verify After Copy",
+                                    style='Modern.TCheckbutton',
                                     variable=self.verify_var)
-        verify_cb.grid(row=0, column=1, sticky="w", pady=5)
+        verify_cb.grid(row=0, column=1, sticky="w", pady=(0, spacing['xs']))
         self.add_tooltip(verify_cb, "Compare source and destination after \n"
-                        "copying to ensure integrity")
+                         "copying to ensure integrity")
 
         self.preserve_var = tk.BooleanVar(
             value=self.config['options'].get('preserve_perms', True))
         preserve_cb = ttk.Checkbutton(options_frame, text="🔐 Preserve Permissions",
+                                      style='Modern.TCheckbutton',
                                       variable=self.preserve_var)
-        preserve_cb.grid(row=0, column=2, sticky="w", pady=5)
+        preserve_cb.grid(row=0, column=2, sticky="w", pady=(0, spacing['xs']))
 
         # Row 2: Exclusions and duplicates
         self.exclude_var = tk.BooleanVar(
             value=self.config['options'].get('exclude_system', True))
         exclude_cb = ttk.Checkbutton(options_frame,
                                     text="🚫 Exclude System Files",
+                                    style='Modern.TCheckbutton',
                                     variable=self.exclude_var)
-        exclude_cb.grid(row=1, column=0, sticky="w", pady=5)
+        exclude_cb.grid(row=1, column=0, sticky="w", pady=(spacing['xs'], 0))
         self.add_tooltip(exclude_cb, "Skip .DS_Store, .Spotlight-V100, etc.")
 
         dup_frame = ttk.Frame(options_frame)
-        dup_frame.grid(row=1, column=1, columnspan=2, sticky="w", pady=5)
+        dup_frame.grid(row=1, column=1, columnspan=2, sticky="w", pady=(spacing['xs'], 0))
 
-        ttk.Label(dup_frame, text="Duplicates:").pack(side=tk.LEFT)
+        ttk.Label(dup_frame, text="Duplicates:", style='Header.TLabel').pack(side=tk.LEFT, padx=(0, spacing['xs']))
         self.duplicates_var = tk.StringVar(
             value=self.config['options'].get('duplicate_action', 'review'))
         dup_combo = ttk.Combobox(dup_frame, textvariable=self.duplicates_var,
                                   values=["skip", "overwrite", "rename", "review"],
-                                  state="readonly", width=12)
-        dup_combo.pack(side=tk.LEFT, padx=5)
+                                  state="readonly", width=12,
+                                  style='Modern.TCombobox')
+        dup_combo.pack(side=tk.LEFT, padx=(0, spacing['sm']))
         self.add_tooltip(dup_combo, "How to handle duplicate files:\n"
-                         "• skip: Skip duplicates\n"
-                         "• overwrite: Replace with newer\n"
-                         "• rename: Add suffix (_1, _2)\n"
-                         "• review: Move to review folder")
+                          "• skip: Skip duplicates\n"
+                          "• overwrite: Replace with newer\n"
+                          "• rename: Add suffix (_1, _2)\n"
+                          "• review: Move to review folder")
 
         # Row 3: File type filtering with Magika
         filter_frame = ttk.Frame(options_frame)
-        filter_frame.grid(row=2, column=0, columnspan=3, sticky="w", pady=5)
+        filter_frame.grid(row=2, column=0, columnspan=3, sticky="w", pady=(spacing['xs'], 0))
 
         self.filter_enabled_var = tk.BooleanVar(value=False)
         filter_cb = ttk.Checkbutton(
             filter_frame, text="🤖 AI File Type Filter",
+            style='Modern.TCheckbutton',
             variable=self.filter_enabled_var,
             command=self.toggle_file_filter)
-        filter_cb.pack(side=tk.LEFT)
+        filter_cb.pack(side=tk.LEFT, padx=(0, spacing['sm']))
 
         self.filter_categories = {
             'images': tk.BooleanVar(value=True),
@@ -336,33 +451,52 @@ class IntelligentCopier:
         self.filter_combo = ttk.Combobox(
             filter_frame,
             values=["Include selected", "Exclude selected"],
-            state="disabled", width=15)
+            state="disabled", width=15,
+            style='Modern.TCombobox')
         self.filter_combo.current(0)
-        self.filter_combo.pack(side=tk.LEFT, padx=10)
+        self.filter_combo.pack(side=tk.LEFT, padx=spacing['sm'])
         self.add_tooltip(self.filter_combo, "Include or exclude selected file types")
 
         for cat in ['images', 'videos', 'audio', 'documents', 'code', 'archives']:
             cb = ttk.Checkbutton(
                 filter_frame, text=cat.capitalize(),
+                style='Modern.TCheckbutton',
                 variable=self.filter_categories[cat],
-                state=tk.DISABLED)
-            cb.pack(side=tk.LEFT, padx=2)
+                state=tk.NORMAL)  # Changed from DISABLED to NORMAL to enable interaction
+            cb.pack(side=tk.LEFT, padx=spacing['xs'])
 
     def setup_progress_section(self, parent, row):
         """Setup progress bar and statistics."""
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        colors = UI_CONSTANTS['colors']
+        
         progress_frame = ttk.LabelFrame(parent, text="Progress",
-                                        padding="15")
+                                        style='Modern.TLabelframe',
+                                        padding=(spacing['md'], spacing['sm']))
         progress_frame.grid(row=row, column=0, columnspan=3,
-                           sticky="ew", pady=10)
+                           sticky="ew", pady=(0, spacing['md']))
         progress_frame.columnconfigure(0, weight=1)
 
-        # Progress bar
+        # Progress bar with percentage label
+        progress_container = ttk.Frame(progress_frame)
+        progress_container.grid(row=0, column=0, columnspan=3,
+                               sticky="ew", pady=(0, spacing['sm']))
+        progress_container.columnconfigure(0, weight=1)
+        
         self.progress_var = tk.DoubleVar(value=0)
         self.progress_bar = ttk.Progressbar(
-            progress_frame, variable=self.progress_var,
-            maximum=100, mode='determinate', length=800)
-        self.progress_bar.grid(row=0, column=0, columnspan=3,
-                              sticky="ew", pady=10)
+            progress_container, variable=self.progress_var,
+            maximum=100, mode='determinate')
+        self.progress_bar.grid(row=0, column=0, sticky="ew")
+        
+        # Progress percentage label
+        self.progress_percent_var = tk.StringVar(value="0%")
+        progress_percent_lbl = ttk.Label(progress_container, 
+                                        textvariable=self.progress_percent_var,
+                                        font=fonts['body_bold'],
+                                        foreground=colors['primary'])
+        progress_percent_lbl.grid(row=0, column=1, padx=(spacing['sm'], 0))
 
         # Status labels
         status_frame = ttk.Frame(progress_frame)
@@ -373,123 +507,150 @@ class IntelligentCopier:
 
         self.status_var = tk.StringVar(value="Ready")
         status_lbl = ttk.Label(status_frame, textvariable=self.status_var,
-                              font=('Helvetica', 10, 'bold'))
+                              style='Status.TLabel')
         status_lbl.grid(row=0, column=0, sticky="w")
 
         self.stats_var = tk.StringVar(value="Files: 0/0 | Size: 0 GB/0 GB")
         stats_lbl = ttk.Label(status_frame, textvariable=self.stats_var,
-                             font=('Helvetica', 9))
+                             style='Status.TLabel')
         stats_lbl.grid(row=0, column=1, sticky="e")
 
         self.speed_var = tk.StringVar(value="Speed: -")
         speed_lbl = ttk.Label(status_frame, textvariable=self.speed_var,
-                             font=('Helvetica', 9, 'bold'), foreground='#007AFF')
+                             style='Status.TLabel',
+                             foreground=colors['primary'])
         speed_lbl.grid(row=0, column=2, sticky="e")
 
         # Time estimate
         self.time_var = tk.StringVar(value="ETA: -")
         time_lbl = ttk.Label(progress_frame, textvariable=self.time_var,
-                            font=('Helvetica', 9), foreground='gray')
-        time_lbl.grid(row=2, column=0, columnspan=3, sticky="w", pady=(5, 0))
+                            style='Status.TLabel',
+                            foreground=colors['text_tertiary'])
+        time_lbl.grid(row=2, column=0, columnspan=3, sticky="w", pady=(spacing['xs'], 0))
 
     def setup_log_section(self, parent, row):
         """Setup log output area."""
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        colors = UI_CONSTANTS['colors']
+        
         log_frame = ttk.Frame(parent)
-        log_frame.grid(row=row, column=0, columnspan=3, sticky="nsew", pady=10)
+        log_frame.grid(row=row, column=0, columnspan=3, sticky="nsew", pady=(0, spacing['md']))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(1, weight=1)
 
         ttk.Label(log_frame, text="Activity Log:",
-                 font=('Helvetica', 10, 'bold')).grid(
-            row=0, column=0, sticky="w", pady=(0, 5))
+                 style='Header.TLabel').grid(
+            row=0, column=0, sticky="w", pady=(0, spacing['xs']))
 
         # Log text with scrollbar
         self.log_text = scrolledtext.ScrolledText(
-            log_frame, height=12, wrap=tk.WORD, font=('Menlo', 10),
-            bg='#1e1e1e', fg='#d4d4d4', insertbackground='white',
-            selectbackground='#264f78', selectforeground='white',
-            padx=10, pady=10)
+            log_frame, height=12, wrap=tk.WORD, font=fonts['code'],
+            bg=colors['background'], fg=colors['text_primary'], 
+            insertbackground=colors['text_primary'],
+            selectbackground=colors['primary'], selectforeground=colors['surface'],
+            padx=spacing['sm'], pady=spacing['sm'])
         self.log_text.grid(row=1, column=0, sticky="nsew")
         self.log_text.config(state=tk.DISABLED)
 
         # Log level filter
         filter_frame = ttk.Frame(log_frame)
-        filter_frame.grid(row=2, column=0, sticky="e", pady=(5, 0))
+        filter_frame.grid(row=2, column=0, sticky="e", pady=(spacing['xs'], 0))
 
         ttk.Button(filter_frame, text="Clear Log",
-                  command=self.clear_log).pack(side=tk.LEFT, padx=2)
+                  style='Modern.TButton',
+                  command=self.clear_log).pack(side=tk.LEFT, padx=(0, spacing['xs']))
         ttk.Button(filter_frame, text="Save Log",
-                  command=self.save_log).pack(side=tk.LEFT, padx=2)
+                  style='Modern.TButton',
+                  command=self.save_log).pack(side=tk.LEFT, padx=(0, spacing['xs']))
 
     def setup_button_frame(self, parent, row):
         """Setup action buttons."""
+        spacing = UI_CONSTANTS['spacing']
+        
         btn_frame = ttk.Frame(parent)
-        btn_frame.grid(row=row, column=0, columnspan=3, pady=15)
+        btn_frame.grid(row=row, column=0, columnspan=3, pady=(spacing['lg'], 0))
 
         # Primary actions
         self.analyze_btn = ttk.Button(
-            btn_frame, text="Analyze", command=self.analyze, width=12)
-        self.analyze_btn.pack(side=tk.LEFT, padx=5)
+            btn_frame, text="Analyze", command=self.analyze,
+            style='Modern.TButton')
+        self.analyze_btn.pack(side=tk.LEFT, padx=(0, spacing['sm']))
 
         self.start_btn = ttk.Button(
             btn_frame, text=" Start Copy", command=self.start_copy,
-            width=12, style='Accent.TButton')
-        self.start_btn.pack(side=tk.LEFT, padx=5)
+            style='Modern.Accent.TButton')
+        self.start_btn.pack(side=tk.LEFT, padx=spacing['sm'])
 
         self.pause_btn = ttk.Button(
             btn_frame, text=" Pause", command=self.pause_copy,
+            style='Modern.TButton',
             width=12, state=tk.DISABLED)
-        self.pause_btn.pack(side=tk.LEFT, padx=5)
+        self.pause_btn.pack(side=tk.LEFT, padx=spacing['sm'])
 
         self.verify_btn = ttk.Button(
             btn_frame, text="Verify", command=self.verify_copy,
+            style='Modern.TButton',
             width=12, state=tk.NORMAL)
-        self.verify_btn.pack(side=tk.LEFT, padx=5)
+        self.verify_btn.pack(side=tk.LEFT, padx=spacing['sm'])
 
         # Secondary actions
-        ttk.Separator(btn_frame, orient='vertical').pack(
-            side=tk.LEFT, fill='y', padx=15)
+        separator = ttk.Separator(btn_frame, orient='vertical', style='Modern.TSeparator')
+        separator.pack(side=tk.LEFT, fill='y', padx=spacing['lg'])
 
         self.resume_btn = ttk.Button(
             btn_frame, text="Resume", command=self.resume_session,
-            width=12)
-        self.resume_btn.pack(side=tk.LEFT, padx=5)
+            style='Modern.TButton')
+        self.resume_btn.pack(side=tk.LEFT, padx=spacing['sm'])
 
         ttk.Button(btn_frame, text="Report",
-                  command=self.generate_report, width=10).pack(
-            side=tk.LEFT, padx=5)
+                  style='Modern.TButton',
+                  command=self.generate_report).pack(
+            side=tk.LEFT, padx=spacing['sm'])
 
         ttk.Button(btn_frame, text="Safe Delete",
-                  command=self.safe_delete_check, width=10).pack(
-            side=tk.LEFT, padx=5)
+                  style='Modern.TButton',
+                  command=self.safe_delete_check).pack(
+            side=tk.LEFT, padx=spacing['sm'])
 
     def setup_status_bar(self, parent, row):
         """Setup bottom status bar."""
-        status_frame = ttk.Frame(parent, relief=tk.SUNKEN, padding="5")
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        colors = UI_CONSTANTS['colors']
+        
+        status_frame = ttk.Frame(parent, relief=tk.SUNKEN, 
+                                padding=(spacing['xs'], spacing['xxs']))
         status_frame.grid(row=row, column=0, columnspan=3,
-                         sticky="ew", pady=(5, 0))
+                         sticky="ew", pady=(spacing['sm'], 0))
         status_frame.columnconfigure(0, weight=1)
 
         self.bottom_status = tk.StringVar(value="Ready | No active session")
         status_lbl = ttk.Label(status_frame, textvariable=self.bottom_status,
-                              font=('Helvetica', 9))
+                              style='Status.TLabel')
         status_lbl.grid(row=0, column=0, sticky="w")
 
         session_lbl = ttk.Label(status_frame,
                                text=f"Session: {self.session_id}",
-                               font=('Helvetica', 8), foreground='gray')
+                               style='Status.TLabel',
+                               foreground=colors['text_tertiary'])
         session_lbl.grid(row=0, column=1, sticky="e")
 
     def add_tooltip(self, widget, text):
         """Add a tooltip to a widget."""
+        spacing = UI_CONSTANTS['spacing']
+        fonts = UI_CONSTANTS['fonts']
+        colors = UI_CONSTANTS['colors']
+        
         def show_tooltip(event):
             tooltip = tk.Toplevel(self.root)
             tooltip.wm_overrideredirect(True)
-            tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+            tooltip.wm_geometry(f"+{event.x_root + spacing['sm']}+{event.y_root + spacing['sm']}")
 
             label = ttk.Label(tooltip, text=text, justify=tk.LEFT,
-                            background='#ffffe0', relief='solid',
-                            borderwidth=1, padding=5, font=('Helvetica', 9))
+                            background=colors['surface'], relief='solid',
+                            borderwidth=1, padding=(spacing['xs'], spacing['xxs']), 
+                            font=fonts['small'])
             label.pack()
 
             widget.tooltip = tooltip
@@ -507,17 +668,20 @@ class IntelligentCopier:
         self.log_text.config(state=tk.NORMAL)
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # Color coding based on level
+        # Color coding based on level using UI constants
         tag = level
+        colors = UI_CONSTANTS['colors']
         if level not in self.log_text.tag_names():
             if level == 'error':
-                self.log_text.tag_configure(level, foreground='#ff6b6b')
+                self.log_text.tag_configure(level, foreground=colors['error'])
             elif level == 'warning':
-                self.log_text.tag_configure(level, foreground='#ffd93d')
+                self.log_text.tag_configure(level, foreground=colors['warning'])
             elif level == 'success':
-                self.log_text.tag_configure(level, foreground='#6bcb77')
+                self.log_text.tag_configure(level, foreground=colors['success'])
             elif level == 'info':
-                self.log_text.tag_configure(level, foreground='#4d96ff')
+                self.log_text.tag_configure(level, foreground=colors['primary'])
+            else:
+                self.log_text.tag_configure(level, foreground=colors['text_primary'])
 
         self.log_text.insert(tk.END, f"[{timestamp}] ", 'timestamp')
         self.log_text.insert(tk.END, f"{message}\n", level)
@@ -852,7 +1016,7 @@ class IntelligentCopier:
                 self.queue.put(('complete', dry_run))
             else:
                 self.queue.put(('error',
-                              f"Rsync exited with code {self.copy_process.returncode}"))
+                               f"Rsync exited with code {self.copy_process.returncode}"))
 
         except Exception as e:
             self.queue.put(('error', str(e)))
@@ -871,10 +1035,11 @@ class IntelligentCopier:
                          level = 'info'
                      self.log(message, level)
                  elif msg_type == 'progress':
-                     self.progress_var.set(data['percent'])
-                     self.speed_var.set(f"Speed: {data['speed']}")
-                     self.time_var.set(f"ETA: {data.get('eta', '-')}")
-                     self.status_var.set(f"Copying: {data.get('file', '...')[:50]}")
+                    self.progress_var.set(data['percent'])
+                    self.progress_percent_var.set(f"{int(data['percent'])}%")
+                    self.speed_var.set(f"Speed: {data['speed']}")
+                    self.time_var.set(f"ETA: {data.get('eta', '-')}")
+                    self.status_var.set(f"Copying: {data.get('file', '...')[:50]}")
                  elif msg_type == 'stats_line':
                      self.log(data)
                  elif msg_type == 'status':
