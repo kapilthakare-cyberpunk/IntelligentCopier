@@ -29,6 +29,16 @@ try:
 except ImportError:
     MAGIKA_AVAILABLE = False
 
+# Constants
+EXCLUDE_PATTERNS = [
+    '.Spotlight-V100', '.TemporaryItems', '.Trashes',
+    '.fseventsd', '.DocumentRevisions-V100',
+    '.DS_Store', '._*', '.sync.ffs_db'
+]
+PROGRESS_UPDATE_INTERVAL = 100  # ms
+MAX_LOG_LINES = 1000
+RECENT_PATHS_LIMIT = 10
+
 __version__ = "1.0.0"
 __author__ = "Kapil Thakare"
 
@@ -848,68 +858,79 @@ class IntelligentCopier:
             self.queue.put(('error', str(e)))
 
     def process_queue(self):
-        """Process messages from worker threads."""
-        try:
-            while True:
-                msg_type, data = self.queue.get_nowait()
+         """Process messages from worker threads."""
+         try:
+             while True:
+                 msg_type, data = self.queue.get_nowait()
 
-                if msg_type == 'output':
-                    self.log(data)
-                elif msg_type == 'progress':
-                    self.progress_var.set(data['percent'])
-                    self.speed_var.set(f"Speed: {data['speed']}")
-                    self.time_var.set(f"ETA: {data.get('eta', '-')}")
-                    self.status_var.set(f"Copying: {data.get('file', '...')[:50]}")
-                elif msg_type == 'stats_line':
-                    self.log(data)
-                elif msg_type == 'status':
-                    self.status_var.set(data)
-                elif msg_type == 'analyze_done':
-                    self.stats_var.set(
-                        f"Files: {data['files']:,} | Dirs: {data['dirs']:,} | Size: {data['size']}"
-                    )
-                    self.status_var.set("Analysis complete")
-                    self.log(f" Found {data['files']:,} files, {data['dirs']:,} directories, "
-                            f"total size: {data['size']}", 'success')
-                    self.analyze_btn.config(state=tk.NORMAL)
-                elif msg_type == 'complete':
-                    self.is_copying = False
-                    self.start_btn.config(state=tk.NORMAL)
-                    self.analyze_btn.config(state=tk.NORMAL)
-                    self.pause_btn.config(state=tk.DISABLED)
+                 if msg_type == 'output':
+                     if isinstance(data, tuple):
+                         message, level = data
+                     else:
+                         message = data
+                         level = 'info'
+                     self.log(message, level)
+                 elif msg_type == 'progress':
+                     self.progress_var.set(data['percent'])
+                     self.speed_var.set(f"Speed: {data['speed']}")
+                     self.time_var.set(f"ETA: {data.get('eta', '-')}")
+                     self.status_var.set(f"Copying: {data.get('file', '...')[:50]}")
+                 elif msg_type == 'stats_line':
+                     self.log(data)
+                 elif msg_type == 'status':
+                     self.status_var.set(data)
+                 elif msg_type == 'analyze_done':
+                     self.stats_var.set(
+                         f"Files: {data['files']:,} | Dirs: {data['dirs']:,} | Size: {data['size']}"
+                     )
+                     self.status_var.set("Analysis complete")
+                     self.log(f" Found {data['files']:,} files, {data['dirs']:,} directories, "
+                             f"total size: {data['size']}", 'success')
+                     self.analyze_btn.config(state=tk.NORMAL)
+                 elif msg_type == 'complete':
+                     self.is_copying = False
+                     self.start_btn.config(state=tk.NORMAL)
+                     self.analyze_btn.config(state=tk.NORMAL)
+                     self.pause_btn.config(state=tk.DISABLED)
 
-                    if data:  # dry run complete
-                        self.log(" Dry run complete. Ready to copy.", 'success')
-                        self.status_var.set("Dry run complete")
-                        if messagebox.askyesno("Dry Run Complete",
-                                              "Proceed with actual copy?"):
-                            self.dry_run_var.set(False)
-                            self.start_copy()
-                    else:
-                        elapsed = datetime.now() - self.stats['start_time']
-                        self.log(f" Copy complete! Time: {elapsed}", 'success')
-                        self.status_var.set("Copy complete")
-                        self.progress_var.set(100)
-                        self.verify_btn.config(state=tk.NORMAL)
-                        self.save_session()
+                     if data:  # dry run complete
+                         self.log(" Dry run complete. Ready to copy.", 'success')
+                         self.status_var.set("Dry run complete")
+                         if messagebox.askyesno("Dry Run Complete",
+                                               "Proceed with actual copy?"):
+                             self.dry_run_var.set(False)
+                             self.start_copy()
+                     else:
+                         elapsed = datetime.now() - self.stats['start_time']
+                         self.log(f" Copy complete! Time: {elapsed}", 'success')
+                         self.status_var.set("Copy complete")
+                         self.progress_var.set(100)
+                         self.verify_btn.config(state=tk.NORMAL)
+                         self.save_session()
 
-                        if self.verify_var.get():
-                            if messagebox.askyesno("Verify?",
-                                                   "Copy complete. Run verification now?"):
-                                self.verify_copy()
-                elif msg_type == 'error':
-                    self.log(f"ERROR: {data}", 'error')
-                    self.is_copying = False
-                    self.start_btn.config(state=tk.NORMAL)
-                    self.analyze_btn.config(state=tk.NORMAL)
-                    self.pause_btn.config(state=tk.DISABLED)
-                    self.status_var.set("Error occurred")
-                    messagebox.showerror("Error", str(data))
+                         if self.verify_var.get():
+                             if messagebox.askyesno("Verify?",
+                                                    "Copy complete. Run verification now?"):
+                                 self.verify_copy()
+                 elif msg_type == 'verify_complete':
+                     self.is_verifying = False
+                     self.verify_btn.config(state=tk.NORMAL)
+                     self.status_var.set("Verification complete")
+                 elif msg_type == 'safe_delete_result':
+                     self._show_safe_delete_dialog(data)
+                 elif msg_type == 'error':
+                     self.log(f"ERROR: {data}", 'error')
+                     self.is_copying = False
+                     self.start_btn.config(state=tk.NORMAL)
+                     self.analyze_btn.config(state=tk.NORMAL)
+                     self.pause_btn.config(state=tk.DISABLED)
+                     self.status_var.set("Error occurred")
+                     messagebox.showerror("Error", str(data))
 
-        except queue.Empty:
-            pass
+         except queue.Empty:
+             pass
 
-        self.root.after(100, self.process_queue)
+         self.root.after(100, self.process_queue)
 
     def pause_copy(self):
         """Pause the current copy operation."""
@@ -1163,71 +1184,6 @@ class IntelligentCopier:
 
         except Exception as e:
             self.queue.put(('error', f"Safe delete check failed: {str(e)}"))
-
-    def process_queue(self):
-        """Process messages from worker threads."""
-        try:
-            while True:
-                msg_type, data = self.queue.get_nowait()
-
-                if msg_type == 'safe_delete_result':
-                    self._show_safe_delete_dialog(data)
-                    continue
-
-                if msg_type == 'output':
-                    if isinstance(data, tuple):
-                        message, level = data
-                    else:
-                        message = data
-                        level = 'info'
-                    self.log(message, level)
-                elif msg_type == 'status':
-                    self.status_var.set(data)
-                elif msg_type == 'progress':
-                    self.progress_var.set(data)
-                elif msg_type == 'speed':
-                    self.speed_var.set(f"Speed: {data}")
-                elif msg_type == 'eta':
-                    self.time_var.set(f"ETA: {data}")
-                elif msg_type == 'stats':
-                    self.stats_var.set(data)
-                elif msg_type == 'analyze_done':
-                    self.log(f"Analysis: {data['files']} files, {data['dirs']} directories, {data['size']}")
-                    self.status_var.set("Ready")
-                    self.analyze_btn.config(state=tk.NORMAL)
-                elif msg_type == 'copy_complete':
-                    self.is_copying = False
-                    self.start_btn.config(state=tk.NORMAL)
-                    self.analyze_btn.config(state=tk.NORMAL)
-                    self.pause_btn.config(state=tk.DISABLED)
-                    if data.get('dry_run'):
-                        self.dry_run_var.set(False)
-                        self.start_copy()
-                    else:
-                        elapsed = datetime.now() - self.stats['start_time']
-                        self.log(f" Copy complete! Time: {elapsed}", 'success')
-                        self.status_var.set("Copy complete")
-                        self.progress_var.set(100)
-                        self.verify_btn.config(state=tk.NORMAL)
-                        self.save_session()
-
-                        if self.verify_var.get():
-                            if messagebox.askyesno("Verify?",
-                                                   "Copy complete. Run verification now?"):
-                                self.verify_copy()
-                elif msg_type == 'error':
-                    self.log(f"ERROR: {data}", 'error')
-                    self.is_copying = False
-                    self.start_btn.config(state=tk.NORMAL)
-                    self.analyze_btn.config(state=tk.NORMAL)
-                    self.pause_btn.config(state=tk.DISABLED)
-                    self.status_var.set("Error occurred")
-                    messagebox.showerror("Error", str(data))
-
-        except queue.Empty:
-            pass
-
-        self.root.after(100, self.process_queue)
 
     def _show_safe_delete_dialog(self, data):
         """Show dialog with safe delete options."""
