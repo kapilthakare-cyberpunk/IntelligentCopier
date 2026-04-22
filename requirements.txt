@@ -2,7 +2,10 @@
 # Runtime dependencies
 
 # Tkinter is typically included with Python
-# No additional runtime dependencies required
+
+# File type detection (optional but recommended)
+# Uncomment to enable content-based file type detection:
+# magika>=0.5.0
 
 # Optional dependencies for enhanced features
 # Uncomment if needed:
