@@ -141,71 +141,39 @@ class IntelligentCopier:
     def setup_styles(self):
         """Configure ttk styles for the application."""
         style = ttk.Style()
-        style.theme_use('clam')
+        
+        # Try different themes to find one that works on macOS
+        available_themes = style.theme_names()
+        if 'aqua' in available_themes:
+            style.theme_use('aqua')
+        elif 'clam' in available_themes:
+            style.theme_use('clam')
+        elif 'alt' in available_themes:
+            style.theme_use('alt')
+        else:
+            style.theme_use(style.theme_names()[0] if available_themes else 'default')
 
         # Configure colors using UI constants
         colors = UI_CONSTANTS['colors']
         fonts = UI_CONSTANTS['fonts']
         spacing = UI_CONSTANTS['spacing']
         
-        # Configure custom styles
+        # Basic styles that won't break the UI
         style.configure('Title.TLabel', 
                        font=fonts['title'], 
                        foreground=colors['primary'])
         style.configure('Header.TLabel', 
                        font=fonts['header'], 
                        foreground=colors['text_primary'])
-        style.configure('SubHeader.TLabel', 
-                       font=fonts['subheader'], 
-                       foreground=colors['text_primary'])
         style.configure('Status.TLabel', 
                        font=fonts['status'], 
                        foreground=colors['text_secondary'])
         style.configure('Accent.TButton', 
-                       font=fonts['body_bold'],
-                       foreground='white')
+                       font=fonts['body_bold'])
 
         # Progress bar style
         style.configure('Horizontal.TProgressbar', 
-                       thickness=20,
-                       troughcolor=colors['border'],
-                       background=colors['primary'])
-        
-        # Entry styles
-        style.configure('Modern.TEntry',
-                       fieldbackground=colors['surface'],
-                       borderwidth=1,
-                       relief='solid')
-        
-        # LabelFrame styles
-        style.configure('Modern.TLabelframe',
-                       background=colors['surface'],
-                       borderwidth=1,
-                       relief='solid')
-        style.configure('Modern.TLabelframe.Label',
-                       background=colors['surface'],
-                       foreground=colors['text_primary'],
-                       font=fonts['header'])
-        
-        # Checkbutton styles
-        style.configure('Modern.TCheckbutton',
-                       background=colors['surface'],
-                       foreground=colors['text_primary'],
-                       font=fonts['body'])
-        
-        # Combobox styles
-        style.configure('Modern.TCombobox',
-                       fieldbackground=colors['surface'],
-                       background=colors['surface'],
-                       arrowcolor=colors['text_primary'])
-        
-        # Button styles
-        style.configure('Modern.TButton',
-                       padding=(spacing['sm'], spacing['xs']),
-                       font=fonts['body'])
-        style.configure('Modern.Accent.TButton',
-                       font=fonts['body_bold'],
-                       foreground='white')
+                       thickness=20)
 
     def load_config(self):
         """Load user configuration from file."""
