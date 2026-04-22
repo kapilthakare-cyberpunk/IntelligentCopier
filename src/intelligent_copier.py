@@ -101,6 +101,7 @@ class IntelligentCopier:
         self.is_verifying = False
         self.is_paused = False
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.filter_checkbuttons = {}
 
         # Statistics
         self.stats = {
@@ -415,6 +416,9 @@ class IntelligentCopier:
             'archives': tk.BooleanVar(value=True),
             'other': tk.BooleanVar(value=True)
         }
+        
+        # Store checkbutton widgets for later access
+        self.filter_checkbuttons = {}
 
         self.filter_combo = ttk.Combobox(
             filter_frame,
@@ -429,9 +433,9 @@ class IntelligentCopier:
             cb = ttk.Checkbutton(
                 filter_frame, text=cat.capitalize(),
                 style='Modern.TCheckbutton',
-                variable=self.filter_categories[cat],
-                state=tk.NORMAL)  # Changed from DISABLED to NORMAL to enable interaction
+                variable=self.filter_categories[cat])
             cb.pack(side=tk.LEFT, padx=spacing['xs'])
+            self.filter_checkbuttons[cat] = cb
 
     def setup_progress_section(self, parent, row):
         """Setup progress bar and statistics."""
@@ -728,7 +732,7 @@ class IntelligentCopier:
         enabled = self.filter_enabled_var.get()
         state = tk.NORMAL if enabled else tk.DISABLED
         self.filter_combo.config(state=state)
-        for cb in self.filter_categories.values():
+        for cb in self.filter_checkbuttons.values():
             cb.config(state=state)
 
     def identify_file_type(self, file_path):
@@ -1173,12 +1177,6 @@ class IntelligentCopier:
 
         except Exception as e:
             self.queue.put(('error', f"Verification failed: {str(e)}"))
-
-        # Handle verify_complete
-        if msg_type == 'verify_complete':
-            self.is_verifying = False
-            self.verify_btn.config(state=tk.NORMAL)
-            self.status_var.set("Verification complete")
 
     def generate_report(self):
         """Generate a detailed copy report."""
