@@ -102,3 +102,7 @@ dist/
 *.bak
 *.backup
 *~
+
+# Local copy-session runtime artifacts (personal paths)
+session_status.json
+COPY_SESSION_STATUS.md
